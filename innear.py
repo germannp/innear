@@ -1,6 +1,7 @@
-'''Script to register cell positions'''
+'''Toolkit to analyse inner ear development'''
 import numpy as np
 import pandas as pd
+import scipy.spatial as spatial
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -90,10 +91,17 @@ def register(target_df, source_df, df_to_transform):
         df_to_transform['z'][cell] = point[2]
 
 
+def estimate_density(df, radius=0.1):
+    tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
+    volume = 4*np.pi*radius**3/3
+    df['Density'] = [(tree.query_ball_point(point, radius).__len__()-1)/volume
+        for point in tree.data]
+
+
 if __name__ == '__main__':
     '''Demonstrates registration of two pyramids'''
 
-    # Create pyramids
+    # Create pyramids to register on top of each other
     target_pyramid = pd.DataFrame(
         {'x': [0, 0, 1, 1, 0.5],
          'y': [0, 1, 1, 0, 0.5],
@@ -105,11 +113,13 @@ if __name__ == '__main__':
          'z': target_pyramid['z'] + 0.25,
          'selection': ['pyramid', 'pyramid', 'pyramid', 'pyramid', 'pyramid']})
 
+    # Create additional points
+    n_points = 100
     source_points = source_pyramid.append(pd.DataFrame(
-        {'x': source_pyramid['x'][4] + np.random.randn(10)/10,
-         'y': source_pyramid['y'][4] + np.random.randn(10)/10,
-         'z': source_pyramid['z'][4] + np.random.randn(10)/10,
-         'selection': ['points' for _ in range(10)]})).reset_index()
+        {'x': source_pyramid['x'][4] + np.random.randn(n_points)/10,
+         'y': source_pyramid['y'][4] + np.random.randn(n_points)/10,
+         'z': source_pyramid['z'][4] + np.random.randn(n_points)/10 + 0.1,
+         'selection': ['points' for _ in range(n_points)]})).reset_index()
 
     # Registration
     before_pyramid = source_pyramid.copy()
@@ -135,7 +145,8 @@ if __name__ == '__main__':
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
     after.plot_trisurf(after_pyramid['x'], after_pyramid['y'], after_pyramid['z'],
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
-    after.scatter(after_points['x'], after_points['y'], after_points['z'])
+    after.scatter(after_points['x'], after_points['y'], after_points['z'], 
+        c=after_points['Density'], cmap='RdBu_r')
 
     plt.tight_layout()
     plt.show()
