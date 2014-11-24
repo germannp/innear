@@ -97,7 +97,7 @@ def estimate_density(df, radius=0.1):
     tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
     volume = 4*np.pi*radius**3/3
     df['r = {:1.2f}'.format(radius)] = \
-        [(tree.query_ball_point(point, radius).__len__()-1)/volume 
+        [(tree.query_ball_point(point, radius).__len__())/volume 
             for point in tree.data]
 
 
@@ -133,11 +133,11 @@ if __name__ == '__main__':
          'selection': ['pyramid', 'pyramid', 'pyramid', 'pyramid', 'pyramid']})
 
     # Create additional points
-    n_points = 100
+    n_points = 150
     source_points = source_pyramid.append(pd.DataFrame(
         {'x': source_pyramid['x'][4] + np.random.randn(n_points)/10,
          'y': source_pyramid['y'][4] + np.random.randn(n_points)/10,
-         'z': source_pyramid['z'][4] + np.random.randn(n_points)/10 + 0.1,
+         'z': source_pyramid['z'][4] + np.random.randn(n_points)/10 + 0.2,
          'selection': ['points' for _ in range(n_points)]})).reset_index()
 
     # Registration
