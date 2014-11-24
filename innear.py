@@ -4,6 +4,7 @@ import pandas as pd
 import scipy.spatial as spatial
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import seaborn as sns
 
 import vtk
 
@@ -92,14 +93,32 @@ def register(target_df, source_df, df_to_transform):
 
 
 def estimate_density(df, radius=0.1):
+    '''Estimates the local density by counting points within radius'''
     tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
     volume = 4*np.pi*radius**3/3
-    df['Density'] = [(tree.query_ball_point(point, radius).__len__()-1)/volume
-        for point in tree.data]
+    df['r = {:1.2f}'.format(radius)] = \
+        [(tree.query_ball_point(point, radius).__len__()-1)/volume 
+            for point in tree.data]
+
+
+def sweep_radii(df, r_min=0.025, r_max=0.3, n=7):
+    '''Estimates density for different radii to find a sensible one'''
+    for i in range(n):
+        radius = i*(r_max-r_min)/(n-1) + r_min
+        estimate_density(df, radius=radius)
+
+
+def plot_densities(df):
+    '''Plot distributions of density estimates'''
+    densities = [column for column in df.columns if column.startswith('r = ')]
+    sns.set(style="whitegrid")
+    plt.title('Density estimtates for different radii')
+    sns.violinplot(df[densities], color='PuRd_r')
+    plt.show()
 
 
 if __name__ == '__main__':
-    '''Demonstrates registration of two pyramids'''
+    '''Demonstrates registration and density estimation'''
 
     # Create pyramids to register on top of each other
     target_pyramid = pd.DataFrame(
@@ -128,7 +147,12 @@ if __name__ == '__main__':
     after_pyramid = source_points[source_points.selection == 'pyramid']
     after_points = source_points[source_points.selection == 'points']
 
+    # Estimate density
+    sweep_radii(after_points)
+    plot_densities(after_points)
+
     # Plot before & after
+    sns.set(style="white")
     before = plt.subplot(1,2,1, projection='3d')
     plt.title('Before registration')
     before.auto_scale_xyz([-1,1], [-1,1], [-1,1])
@@ -139,14 +163,14 @@ if __name__ == '__main__':
     before.scatter(before_points['x'], before_points['y'], before_points['z'])
 
     after = plt.subplot(1,2,2, projection='3d')
-    plt.title('After registration')
+    plt.title('After registration, with density estimates')
     after.auto_scale_xyz([-1,1], [-1,1], [-1,1])
     after.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
     after.plot_trisurf(after_pyramid['x'], after_pyramid['y'], after_pyramid['z'],
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
     after.scatter(after_points['x'], after_points['y'], after_points['z'], 
-        c=after_points['Density'], cmap='RdBu_r')
+        c=after_points['r = 0.12'], cmap='RdBu_r')
 
     plt.tight_layout()
     plt.show()
