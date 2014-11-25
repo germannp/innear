@@ -17,8 +17,8 @@ def register(target_df, source_df, df_to_transform):
     for cell in target_df.index:
         id = TargetPoints.InsertNextPoint(
             target_df['x'][cell], 
-            target_df['y'][cell], 
-            target_df['z'][cell])
+            target_df['y'][cell],
+             target_df['z'][cell])
         TargetVertices.InsertNextCell(1)
         TargetVertices.InsertCellPoint(id)
 
