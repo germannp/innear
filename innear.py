@@ -156,6 +156,7 @@ if __name__ == '__main__':
     before = plt.subplot(1,2,1, projection='3d')
     plt.title('Before registration')
     before.auto_scale_xyz([-1,1], [-1,1], [-1,1])
+    before.axis('off')
     before.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
     before.plot_trisurf(before_pyramid['x'], before_pyramid['y'], before_pyramid['z'],
@@ -165,6 +166,7 @@ if __name__ == '__main__':
     after = plt.subplot(1,2,2, projection='3d')
     plt.title('After registration, with density estimates')
     after.auto_scale_xyz([-1,1], [-1,1], [-1,1])
+    after.axis('off')
     after.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
     after.plot_trisurf(after_pyramid['x'], after_pyramid['y'], after_pyramid['z'],
