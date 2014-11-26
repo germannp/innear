@@ -110,7 +110,6 @@ def estimate_density(df, radius=0.1):
         df['r = {:1.2f}'.format(radius)] = \
             [(tree.query_ball_point(point, radius).__len__())/volume 
                 for point in tree.data]
-    df.replace(np.inf, np.nan, inplace=True)
 
 
 def sweep_radii(df, r_min=0.025, r_max=0.3, n=7):
