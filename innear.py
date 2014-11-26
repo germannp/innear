@@ -92,13 +92,25 @@ def register(target_df, source_df, df_to_transform):
         df_to_transform['z'][cell] = point[2]
 
 
+def nn_distance(df):
+    '''Adds column with distance to nearest neighbour'''
+    for timestep in set(df.timestep.values):
+        tree = spatial.cKDTree(
+            df[df.timestep == timestep].as_matrix(['x', 'y', 'z']))
+        df.loc[df.timestep == timestep, 'NN distance'] = \
+            [tree.query(point, 2)[0][1] for point in tree.data]
+    df.replace(np.inf, np.nan, inplace=True)
+
+
 def estimate_density(df, radius=0.1):
-    '''Estimates the local density by counting points within radius'''
-    tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
-    volume = 4*np.pi*radius**3/3
-    df['r = {:1.2f}'.format(radius)] = \
-        [(tree.query_ball_point(point, radius).__len__())/volume 
-            for point in tree.data]
+    '''Adds column w/ local density est. by counting points within radius'''
+    for timestep in set(df.timestep.values):
+        tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
+        volume = 4*np.pi*radius**3/3
+        df['r = {:1.2f}'.format(radius)] = \
+            [(tree.query_ball_point(point, radius).__len__())/volume 
+                for point in tree.data]
+    df.replace(np.inf, np.nan, inplace=True)
 
 
 def sweep_radii(df, r_min=0.025, r_max=0.3, n=7):
@@ -148,7 +160,7 @@ if __name__ == '__main__':
     after_points = source_points[source_points.selection == 'points']
 
     # Estimate density
-    sweep_radii(after_points)
+    sweep_radii(after_points, n=12)
     plot_densities(after_points)
 
     # Plot before & after
