@@ -159,6 +159,7 @@ if __name__ == '__main__':
     after_points = source_points[source_points.selection == 'points']
 
     # Estimate density
+    after_points['timestep'] = 1
     sweep_radii(after_points, n=12)
     plot_densities(after_points)
 
