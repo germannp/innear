@@ -92,7 +92,32 @@ def register(target_df, source_df, df_to_transform):
         df_to_transform['z'][cell] = point[2]
 
 
-def nn_distance(df):
+def trace_lineage(df): # Not tested
+    '''Adds column with cell_id'''
+    n_cells = df.loc[df.timestep == 1].shape[0]
+    df.loc[df.timestep == 1, 'cell_id'] = range(n_cells)
+    for timestep in set([ts for ts in df.timestep.values if ts > 1]):
+        previous_df = df[df.timestep == timestep - 1]
+        for index, row in df[df.timestep == timestep].iterrows():
+            mother_row = previous_df[previous_df.id_center == row['id_mother']]
+            try:
+                df.loc[df.id_center == row['id_center'], 'cell_id'] = \
+                    int(mother_row['cell_id'].values[0])
+            except:
+                print('Warning: motherless cell')
+                n_cells = n_cells + 1
+                df.loc[df.id_center == row['id_center'], 'cell_id'] = n_cells
+        cells = df[df.timestep == timestep]['cell_id'].values
+        divisions = set([c_id for c_id in cells if cells.tolist().count(c_id) > 1])
+        for division in divisions:
+            cells = df.loc[df.cell_id == division]
+            for index, _ in cells[-2:].iterrows():
+                n_cells = n_cells + 1
+                df.loc[index, 'cell_id'] = n_cells
+    print('{} cells found'.format(n_cells))
+
+
+def nn_distance(df): # Not tested
     '''Adds column with distance to nearest neighbour'''
     for timestep in set(df.timestep.values):
         tree = spatial.cKDTree(
@@ -119,13 +144,10 @@ def sweep_radii(df, r_min=0.025, r_max=0.3, n=7):
         estimate_density(df, radius=radius)
 
 
-def plot_densities(df):
+def plot_densities(df, **kwargs):
     '''Plot distributions of density estimates'''
     densities = [column for column in df.columns if column.startswith('r = ')]
-    sns.set(style="whitegrid")
-    plt.title('Density estimtates for different radii')
-    sns.violinplot(df[densities], color='PuRd_r')
-    plt.show()
+    sns.violinplot(df[densities], **kwargs)
 
 
 if __name__ == '__main__':
@@ -161,7 +183,10 @@ if __name__ == '__main__':
     # Estimate density
     after_points['timestep'] = 1
     sweep_radii(after_points, n=12)
-    plot_densities(after_points)
+    sns.set(style="whitegrid")
+    plt.title('Density estimtates for different radii')
+    plot_densities(after_points, color='PuRd_r')
+    plt.show()
 
     # Plot before & after
     sns.set(style="white")
