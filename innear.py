@@ -87,9 +87,9 @@ def register(target_df, source_df, df_to_transform):
     for cell in range(df_to_transform.shape[0]):
         point = [0,0,0]
         transformedSource.GetPoint(cell, point)
-        df_to_transform['x'][cell] = point[0]
-        df_to_transform['y'][cell] = point[1]
-        df_to_transform['z'][cell] = point[2]
+        df_to_transform.loc[cell, 'x'] = point[0]
+        df_to_transform.loc[cell, 'y'] = point[1]
+        df_to_transform.loc[cell, 'z'] = point[2]
 
 
 def trace_lineage(df): # Not tested
@@ -132,7 +132,7 @@ def estimate_density(df, radius=0.1):
     for timestep in set(df.timestep.values):
         tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
         volume = 4*np.pi*radius**3/3
-        df['r = {:1.2f}'.format(radius)] = \
+        df.loc[:, 'r = {:1.2f}'.format(radius)] = \
             [(tree.query_ball_point(point, radius).__len__())/volume 
                 for point in tree.data]
 
@@ -181,7 +181,7 @@ if __name__ == '__main__':
     after_points = source_points[source_points.selection == 'points']
 
     # Estimate density
-    after_points['timestep'] = 1
+    after_points.loc[:, 'timestep'] = 1
     sweep_radii(after_points, n=12)
     sns.set(style="whitegrid")
     plt.title('Density estimtates for different radii')
