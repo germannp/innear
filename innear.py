@@ -150,7 +150,7 @@ def plot_densities(df, **kwargs):
     sns.violinplot(df[densities], **kwargs)
 
 
-def equalize_axis3d(ax):
+def equalize_axis3d(ax, zoom=1):
     ''' after http://stackoverflow.com/questions/8130823/
     set-matplotlib-3d-plot-aspect-ratio'''
     extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
@@ -159,7 +159,7 @@ def equalize_axis3d(ax):
     max_spread = max(abs(spread))
     r = max_spread/2
     for center, dim in zip(centers, 'xyz'):
-        getattr(ax, 'set_{}lim'.format(dim))(center - r, center + r)
+        getattr(ax, 'set_{}lim'.format(dim))(center - r/zoom, center + r/zoom)
 
 
 if __name__ == '__main__':
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     before.plot_trisurf(before_pyramid['x'], before_pyramid['y'], before_pyramid['z'],
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
     before.scatter(before_points['x'], before_points['y'], before_points['z'])
-    equalize_axis3d(before)
+    equalize_axis3d(before, 1.75)
     after = plt.subplot(1,2,2, projection='3d')
     plt.title('After registration, with density estimates')
     after.set_aspect('equal')
@@ -222,7 +222,7 @@ if __name__ == '__main__':
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
     after.scatter(after_points['x'], after_points['y'], after_points['z'], 
         c=after_points['r = 0.12'], cmap='RdBu_r')
-    equalize_axis3d(after)
+    equalize_axis3d(after, 1.5)
 
     plt.tight_layout()
     plt.show()
