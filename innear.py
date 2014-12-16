@@ -150,16 +150,21 @@ def plot_densities(df, **kwargs):
     sns.violinplot(df[densities], **kwargs)
 
 
-def equalize_axis3d(ax, zoom=1):
-    ''' after http://stackoverflow.com/questions/8130823/
+def equalize_axis3d(source_ax, zoom=1, target_ax=None):
+    '''after http://stackoverflow.com/questions/8130823/
     set-matplotlib-3d-plot-aspect-ratio'''
-    extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    if target_ax == None:
+        target_ax = source_ax
+    else:
+        zoom = 1
+    extents = np.array([getattr(target_ax, 'get_{}lim'.format(dim))() 
+        for dim in 'xyz'])
     spread = extents[:,1] - extents[:,0]
     centers = np.mean(extents, axis=1)
     max_spread = max(abs(spread))
     r = max_spread/2
     for center, dim in zip(centers, 'xyz'):
-        getattr(ax, 'set_{}lim'.format(dim))(center - r/zoom, center + r/zoom)
+        getattr(source_ax, 'set_{}lim'.format(dim))(center - r/zoom, center + r/zoom)
 
 
 if __name__ == '__main__':
