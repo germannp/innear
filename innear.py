@@ -157,12 +157,14 @@ def equalize_axis3d(source_ax, zoom=1, target_ax=None):
         target_ax = source_ax
     else:
         zoom = 1
-    extents = np.array([getattr(target_ax, 'get_{}lim'.format(dim))() 
+    source_extents = np.array([getattr(source_ax, 'get_{}lim'.format(dim))()
         for dim in 'xyz'])
-    spread = extents[:,1] - extents[:,0]
-    centers = np.mean(extents, axis=1)
+    target_extents = np.array([getattr(target_ax, 'get_{}lim'.format(dim))()
+        for dim in 'xyz'])
+    spread = target_extents[:,1] - target_extents[:,0]
     max_spread = max(abs(spread))
     r = max_spread/2
+    centers = np.mean(source_extents, axis=1)
     for center, dim in zip(centers, 'xyz'):
         getattr(source_ax, 'set_{}lim'.format(dim))(center - r/zoom, center + r/zoom)
 
