@@ -84,12 +84,12 @@ def register(target_df, source_df, df_to_transform):
 
     transformedSource = icpTransformFilter.GetOutput()
 
-    for cell in range(df_to_transform.shape[0]):
+    for i, index in enumerate(df_to_transform.index):
         point = [0,0,0]
-        transformedSource.GetPoint(cell, point)
-        df_to_transform.loc[df_to_transform.index[cell], 'x'] = point[0]
-        df_to_transform.loc[df_to_transform.index[cell], 'y'] = point[1]
-        df_to_transform.loc[df_to_transform.index[cell], 'z'] = point[2]
+        transformedSource.GetPoint(i, point)
+        df_to_transform.loc[index, 'x'] = point[0]
+        df_to_transform.loc[index, 'y'] = point[1]
+        df_to_transform.loc[index, 'z'] = point[2]
 
 
 def trace_lineage(df): # Not tested
