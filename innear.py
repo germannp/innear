@@ -18,7 +18,7 @@ def register(target_df, source_df, df_to_transform):
         id = TargetPoints.InsertNextPoint(
             target_df['x'][cell], 
             target_df['y'][cell],
-             target_df['z'][cell])
+            target_df['z'][cell])
         TargetVertices.InsertNextCell(1)
         TargetVertices.InsertCellPoint(id)
 
@@ -87,9 +87,9 @@ def register(target_df, source_df, df_to_transform):
     for cell in range(df_to_transform.shape[0]):
         point = [0,0,0]
         transformedSource.GetPoint(cell, point)
-        df_to_transform.loc[cell, 'x'] = point[0]
-        df_to_transform.loc[cell, 'y'] = point[1]
-        df_to_transform.loc[cell, 'z'] = point[2]
+        df_to_transform.loc[df_to_transform.index[cell], 'x'] = point[0]
+        df_to_transform.loc[df_to_transform.index[cell], 'y'] = point[1]
+        df_to_transform.loc[df_to_transform.index[cell], 'z'] = point[2]
 
 
 def trace_lineage(df): # Not tested
@@ -155,7 +155,8 @@ def equalize_axis3d(source_ax, zoom=1, target_ax=None):
     set-matplotlib-3d-plot-aspect-ratio'''
     if target_ax == None:
         target_ax = source_ax
-    else:
+    elif zoom != 1:
+        print('Zoom ignored when target axis is provided.')
         zoom = 1
     source_extents = np.array([getattr(source_ax, 'get_{}lim'.format(dim))()
         for dim in 'xyz'])
