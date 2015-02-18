@@ -16,7 +16,7 @@ def register(target_df, source_df, df_to_transform):
     TargetVertices = vtk.vtkCellArray()
     for cell in target_df.index:
         id = TargetPoints.InsertNextPoint(
-            target_df['x'][cell], 
+            target_df['x'][cell],
             target_df['y'][cell],
             target_df['z'][cell])
         TargetVertices.InsertNextCell(1)
@@ -27,14 +27,14 @@ def register(target_df, source_df, df_to_transform):
     TargetPolyData.SetVerts(TargetVertices)
     if vtk.VTK_MAJOR_VERSION <= 5:
         TargetPolyData.Update()
-        
+
     # Create vtk data structures for target points
     SourcePoints = vtk.vtkPoints()
     SourceVertices = vtk.vtkCellArray()
     for cell in source_df.index:
         id = SourcePoints.InsertNextPoint(
-            source_df['x'][cell], 
-            source_df['y'][cell], 
+            source_df['x'][cell],
+            source_df['y'][cell],
             source_df['z'][cell])
         SourceVertices.InsertNextCell(1)
         SourceVertices.InsertCellPoint(id)
@@ -133,7 +133,7 @@ def estimate_density(df, radius=0.1):
         tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
         volume = 4*np.pi*radius**3/3
         df.loc[:, 'r = {:1.2f}'.format(radius)] = \
-            [(tree.query_ball_point(point, radius).__len__())/volume 
+            [(tree.query_ball_point(point, radius).__len__())/volume
                 for point in tree.data]
 
 
@@ -168,6 +168,7 @@ def equalize_axis3d(source_ax, zoom=1, target_ax=None):
     centers = np.mean(source_extents, axis=1)
     for center, dim in zip(centers, 'xyz'):
         getattr(source_ax, 'set_{}lim'.format(dim))(center - r/zoom, center + r/zoom)
+    source_ax.set_aspect('equal')
 
 
 if __name__ == '__main__':
@@ -212,7 +213,6 @@ if __name__ == '__main__':
     sns.set(style="white")
     before = plt.subplot(1,2,1, projection='3d')
     plt.title('Before registration')
-    before.set_aspect('equal')
     before.axis('off')
     before.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
@@ -222,15 +222,14 @@ if __name__ == '__main__':
     equalize_axis3d(before, 1.75)
     after = plt.subplot(1,2,2, projection='3d')
     plt.title('After registration, with density estimates')
-    after.set_aspect('equal')
     after.axis('off')
     after.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
     after.plot_trisurf(after_pyramid['x'], after_pyramid['y'], after_pyramid['z'],
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
-    after.scatter(after_points['x'], after_points['y'], after_points['z'], 
+    after.scatter(after_points['x'], after_points['y'], after_points['z'],
         c=after_points['r = 0.12'], cmap='RdBu_r')
-    equalize_axis3d(after, 1.5)
+    equalize_axis3d(after, 1, before)
 
     plt.tight_layout()
     plt.show()
