@@ -117,12 +117,16 @@ def trace_lineage(df): # Not tested
     print('{} cells found'.format(n_cells))
 
 
-def nn_distance(df): # Not tested
+def nn_distance(df, ignore_time=False): # Not tested
     '''Adds column with distance to nearest neighbour'''
-    for timestep in set(df.timestep.values):
+    if ignore_time:
+        timesteps = [set(df.timestep.values)]
+    else:
+        timesteps = [[timestep] for timestep in set(df.timestep.values)]
+    for timestep in timesteps:
         tree = spatial.cKDTree(
-            df[df.timestep == timestep].as_matrix(['x', 'y', 'z']))
-        df.loc[df.timestep == timestep, 'NN distance'] = \
+            df[df.timestep.isin(timestep)].as_matrix(['x', 'y', 'z']))
+        df.loc[df.timestep.isin(timestep), 'NN distance'] = \
             [tree.query(point, 2)[0][1] for point in tree.data]
     df.replace(np.inf, np.nan, inplace=True)
 
