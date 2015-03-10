@@ -190,7 +190,7 @@ if __name__ == '__main__':
          'y': target_pyramid['x']*np.sin(1) + target_pyramid['y']*np.cos(1),
          'z': target_pyramid['z'] + 0.25,
          'selection': ['pyramid', 'pyramid', 'pyramid', 'pyramid', 'pyramid']})
-    
+
     # Create additional points
     n_points = 150
     source_points = source_pyramid.append(pd.DataFrame(
@@ -240,27 +240,27 @@ if __name__ == '__main__':
     plt.show()
 
     # Trace Lineage
-    tracks = pd.DataFrame({
+    df = pd.DataFrame({
         'id_center': 1000 + np.arange(5),
         'timestep': np.arange(1,6),
         'id_mother': np.concatenate((np.zeros(1), 1000 + np.arange(4)))})
 
-    tracks = tracks.append(pd.DataFrame({
+    df = df.append(pd.DataFrame({
         'id_center': 2000 + np.arange(7),
         'timestep': [1, 2, 3, 3, 4, 4, 5],
         'id_mother': [0, 2000, 2001, 2001, 2002, 2003, 2004]}))
 
-    tracks = tracks.append(pd.DataFrame({
+    df = df.append(pd.DataFrame({
         'id_center': 3000 + np.arange(3),
         'timestep': np.arange(10, 13),
         'id_mother': np.concatenate((666*np.ones(1), 3000 + np.arange(2)))}))
 
-    tracks = tracks.append(pd.DataFrame({
+    df = df.append(pd.DataFrame({
         'id_center': 4000 + np.arange(5),
         'timestep': np.arange(10, 15),
         'id_mother': np.concatenate((666*np.ones(1), 4000 + np.arange(4)))}))
 
-    tracks = tracks.reset_index(drop=True)
+    df = df.reset_index(drop=True)
 
-    trace_lineage(tracks)
-    print(tracks)
+    trace_lineage(df)
+    print(df)
