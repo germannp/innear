@@ -108,11 +108,11 @@ def trace_lineage(df):
                 print('  Warning: motherless cell')
                 df.loc[df.id_center == row['id_center'], 'cell_id'] = n_cells
                 n_cells = n_cells + 1
-        cells = df[df.timestep == timestep]['cell_id'].values
-        divisions = set([c_id for c_id in cells if cells.tolist().count(c_id) > 1])
+        c_ids = df[df.timestep == timestep]['cell_id'].values
+        divisions = set([c_id for c_id in c_ids if c_ids.tolist().count(c_id) > 1])
         for division in divisions:
-            cells = df.loc[df.cell_id == division]
-            for index, _ in cells[-2:].iterrows():
+            div_cells = df.loc[df.cell_id == division]
+            for index, _ in div_cells[-2:].iterrows():
                 df.loc[index, 'cell_id'] = n_cells
                 n_cells = n_cells + 1
     print('  {} cells found\n'.format(n_cells))
