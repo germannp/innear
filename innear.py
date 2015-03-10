@@ -92,8 +92,9 @@ def register(target_df, source_df, df_to_transform):
         df_to_transform.loc[index, 'z'] = point[2]
 
 
-def trace_lineage(df): # Not tested
+def trace_lineage(df):
     '''Adds column with cell_id'''
+    print('\nTracing lineage:')
     n_cells = df.loc[df.timestep == 1].shape[0]
     df.loc[df.timestep == 1, 'cell_id'] = range(n_cells)
     for timestep in set([ts for ts in df.timestep.values if ts > 1]):
@@ -104,17 +105,17 @@ def trace_lineage(df): # Not tested
                 df.loc[df.id_center == row['id_center'], 'cell_id'] = \
                     int(mother_row['cell_id'].values[0])
             except:
-                print('Warning: motherless cell')
-                n_cells = n_cells + 1
+                print('  Warning: motherless cell')
                 df.loc[df.id_center == row['id_center'], 'cell_id'] = n_cells
+                n_cells = n_cells + 1
         cells = df[df.timestep == timestep]['cell_id'].values
         divisions = set([c_id for c_id in cells if cells.tolist().count(c_id) > 1])
         for division in divisions:
             cells = df.loc[df.cell_id == division]
             for index, _ in cells[-2:].iterrows():
-                n_cells = n_cells + 1
                 df.loc[index, 'cell_id'] = n_cells
-    print('{} cells found'.format(n_cells))
+                n_cells = n_cells + 1
+    print('  {} cells found\n'.format(n_cells))
 
 
 def nn_distance(df, ignore_time=False): # Not tested
@@ -176,7 +177,7 @@ def equalize_axis3d(source_ax, zoom=1, target_ax=None):
 
 
 if __name__ == '__main__':
-    '''Demonstrates registration and density estimation'''
+    '''Demonstrates registration, density estimation and lineage tracing'''
 
     # Create pyramids to register on top of each other
     target_pyramid = pd.DataFrame(
@@ -189,7 +190,7 @@ if __name__ == '__main__':
          'y': target_pyramid['x']*np.sin(1) + target_pyramid['y']*np.cos(1),
          'z': target_pyramid['z'] + 0.25,
          'selection': ['pyramid', 'pyramid', 'pyramid', 'pyramid', 'pyramid']})
-
+    
     # Create additional points
     n_points = 150
     source_points = source_pyramid.append(pd.DataFrame(
@@ -237,3 +238,29 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     plt.show()
+
+    # Trace Lineage
+    tracks = pd.DataFrame({
+        'id_center': 1000 + np.arange(5),
+        'timestep': np.arange(1,6),
+        'id_mother': np.concatenate((np.zeros(1), 1000 + np.arange(4)))})
+
+    tracks = tracks.append(pd.DataFrame({
+        'id_center': 2000 + np.arange(7),
+        'timestep': [1, 2, 3, 3, 4, 4, 5],
+        'id_mother': [0, 2000, 2001, 2001, 2002, 2003, 2004]}))
+
+    tracks = tracks.append(pd.DataFrame({
+        'id_center': 3000 + np.arange(3),
+        'timestep': np.arange(10, 13),
+        'id_mother': np.concatenate((666*np.ones(1), 3000 + np.arange(2)))}))
+
+    tracks = tracks.append(pd.DataFrame({
+        'id_center': 4000 + np.arange(5),
+        'timestep': np.arange(10, 15),
+        'id_mother': np.concatenate((666*np.ones(1), 4000 + np.arange(4)))}))
+
+    tracks = tracks.reset_index(drop=True)
+
+    trace_lineage(tracks)
+    print(tracks)
