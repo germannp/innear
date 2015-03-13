@@ -95,6 +95,9 @@ def register(target_df, source_df, df_to_transform):
 def trace_lineage(df):
     '''Adds column with cell_id'''
     print('\nTracing lineage:')
+
+    df.loc[:, 'Division'] = False
+
     n_cells = df.loc[df.timestep == 1].shape[0]
     df.loc[df.timestep == 1, 'cell_id'] = range(n_cells)
     for timestep in set([ts for ts in df.timestep.values if ts > 1]):
@@ -111,10 +114,12 @@ def trace_lineage(df):
         c_ids = df[df.timestep == timestep]['cell_id'].values
         divisions = set([c_id for c_id in c_ids if c_ids.tolist().count(c_id) > 1])
         for division in divisions:
-            div_cells = df.loc[df.cell_id == division]
-            for index, _ in div_cells[-2:].iterrows():
+            div_cell = df.loc[df.cell_id == division]
+            for index, _ in div_cell[-2:].iterrows():
                 df.loc[index, 'cell_id'] = n_cells
                 n_cells = n_cells + 1
+            df.loc[div_cell.iloc[-3].name, 'Division'] = True
+
     print('  {} cells found\n'.format(n_cells))
 
 
