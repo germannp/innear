@@ -1,4 +1,4 @@
-'''Toolkit to analyse inner ear development'''
+"""Toolkit to analyse inner ear development"""
 import numpy as np
 import pandas as pd
 import scipy.spatial as spatial
@@ -10,7 +10,7 @@ import vtk
 
 
 def register(target_df, source_df, df_to_transform):
-    '''Register source on top of target by ICP and transform df in place'''
+    """Register source on top of target by ICP and transform df in place"""
     # Create vtk data structures for source points
     TargetPoints = vtk.vtkPoints()
     TargetVertices = vtk.vtkCellArray()
@@ -93,7 +93,7 @@ def register(target_df, source_df, df_to_transform):
 
 
 def trace_lineage(df):
-    '''Adds column with cell_id'''
+    """Adds column with cell_id"""
     print('\nTracing lineage:')
 
     df.loc[:, 'Division'] = False
@@ -124,7 +124,7 @@ def trace_lineage(df):
 
 
 def nn_distance(df, ignore_time=False): # Not tested
-    '''Adds column with distance to nearest neighbour'''
+    """Adds column with distance to nearest neighbour"""
     if ignore_time:
         timesteps = [set(df.timestep.values)]
     else:
@@ -138,7 +138,7 @@ def nn_distance(df, ignore_time=False): # Not tested
 
 
 def estimate_density(df, radius=0.1):
-    '''Adds column w/ local density est. by counting points within radius'''
+    """Adds column w/ local density est. by counting points within radius"""
     for timestep in set(df.timestep.values):
         tree = spatial.cKDTree(df.as_matrix(['x', 'y', 'z']))
         volume = 4*np.pi*radius**3/3
@@ -148,21 +148,21 @@ def estimate_density(df, radius=0.1):
 
 
 def sweep_radii(df, r_min=0.025, r_max=0.3, n=7):
-    '''Estimates density for different radii to find a sensible one'''
+    """Estimates density for different radii to find a sensible one"""
     for i in range(n):
         radius = i*(r_max-r_min)/(n-1) + r_min
         estimate_density(df, radius=radius)
 
 
 def plot_densities(df, **kwargs):
-    '''Plot distributions of density estimates'''
+    """Plot distributions of density estimates"""
     densities = [column for column in df.columns if column.startswith('r = ')]
     sns.violinplot(df[densities], **kwargs)
 
 
 def equalize_axis3d(source_ax, zoom=1, target_ax=None):
-    '''after http://stackoverflow.com/questions/8130823/
-    set-matplotlib-3d-plot-aspect-ratio'''
+    """after http://stackoverflow.com/questions/8130823/
+    set-matplotlib-3d-plot-aspect-ratio"""
     if target_ax == None:
         target_ax = source_ax
     elif zoom != 1:
@@ -182,7 +182,7 @@ def equalize_axis3d(source_ax, zoom=1, target_ax=None):
 
 
 if __name__ == '__main__':
-    '''Demonstrates registration, density estimation and lineage tracing'''
+    """Demonstrates registration, density estimation and lineage tracing"""
 
     # Create pyramids to register on top of each other
     target_pyramid = pd.DataFrame(
@@ -221,6 +221,7 @@ if __name__ == '__main__':
 
     # Plot before & after
     sns.set(style="white")
+
     before = plt.subplot(1,2,1, projection='3d')
     plt.title('Before registration')
     before.axis('off')
@@ -230,6 +231,7 @@ if __name__ == '__main__':
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
     before.scatter(before_points['x'], before_points['y'], before_points['z'])
     equalize_axis3d(before, 1.75)
+
     after = plt.subplot(1,2,2, projection='3d')
     plt.title('After registration, with density estimates')
     after.axis('off')
@@ -237,7 +239,7 @@ if __name__ == '__main__':
         shade=False, color='Green', alpha=0.25, linewidth=0.2)
     after.plot_trisurf(after_pyramid['x'], after_pyramid['y'], after_pyramid['z'],
         shade=False, color='Red', alpha=0.25, linewidth=0.2)
-    after.scatter(after_points['x'], after_points['y'], after_points['z'],
+    asdf = after.scatter(after_points['x'], after_points['y'], after_points['z'],
         c=after_points['r = 0.12'], cmap='RdBu_r')
     equalize_axis3d(after, 1, before)
 
