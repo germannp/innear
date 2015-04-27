@@ -1,4 +1,4 @@
-"""Toolkit to analyse inner ear development"""
+"""Functions to analyse cell tracks"""
 import numpy as np
 import pandas as pd
 import scipy.spatial as spatial
@@ -221,8 +221,9 @@ if __name__ == '__main__':
 
     # Plot before & after
     sns.set(style="white")
+    fig = plt.figure(figsize=(8, 4))
 
-    before = plt.subplot(1,2,1, projection='3d')
+    before = fig.add_subplot(1,2,1, projection='3d')
     plt.title('Before registration')
     before.axis('off')
     before.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
@@ -232,7 +233,7 @@ if __name__ == '__main__':
     before.scatter(before_points['x'], before_points['y'], before_points['z'])
     equalize_axis3d(before, 1.75)
 
-    after = plt.subplot(1,2,2, projection='3d')
+    after = fig.add_subplot(1,2,2, projection='3d')
     plt.title('After registration, with density estimates')
     after.axis('off')
     after.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
