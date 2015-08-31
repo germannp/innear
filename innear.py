@@ -181,6 +181,16 @@ def equalize_axis3d(source_ax, zoom=1, target_ax=None):
     source_ax.set_aspect('equal')
 
 
+def read_vtk_mesh(path): # Not tested
+    """Return points and triangulation from vtk mesh file"""
+    vtk_file = pd.read_table(path, sep=' ')
+    n_pts = int(vtk_file.iloc[3, 1])
+    points = pd.DataFrame(vtk_file.iloc[4:4+n_pts, :3].astype(float).as_matrix(),
+        columns=['x', 'y', 'z'])
+    tri = vtk_file.iloc[5+n_pts:, 1:4].astype(int).as_matrix()
+    return points, tri
+
+
 if __name__ == '__main__':
     """Demonstrates registration, density estimation and lineage tracing"""
 
