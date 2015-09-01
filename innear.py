@@ -191,21 +191,30 @@ def read_vtk_mesh(path): # Not tested
     return points, tri
 
 
-def mesh_surface(points, tri): # Not tested
+def mesh_surface(points, tri):
     """Calculate surfaces of mesh"""
     if type(points) == pd.core.frame.DataFrame:
         points = points.as_matrix()
     vec1 = points[tri[:,1]] - points[tri[:,0]]
     vec2 = points[tri[:,2]] - points[tri[:,1]]
     prod = np.cross(vec1, vec2)
-    surf = np.sum(np.linalg.norm(prod, axis=1))/2
-    return surf
+    return np.sum(np.linalg.norm(prod, axis=1))/2
+
+
+def mesh_volume(points, tri):
+    """Calculate volume of closed surface (inspired by pyformex)"""
+    if type(points) == pd.core.frame.DataFrame:
+        points = points.as_matrix()
+    center = np.mean(points, axis=0)
+    vec1 = points[tri[:,1]] - points[tri[:,0]]
+    vec2 = points[tri[:,2]] - points[tri[:,1]]
+    vec3 = center - points[tri[:,1]]
+    cross = np.cross(vec1, vec2)
+    return np.sum(cross*vec3/6)
 
 
 if __name__ == '__main__':
-    """Demonstrates registration, density estimation and lineage tracing"""
-
-    # Create pyramids to register on top of each other
+    """Demonstrate & test registration and density estimation"""
     target_pyramid = pd.DataFrame(
         {'x': [0, 0, 1, 1, 0.5],
          'y': [0, 1, 1, 0, 0.5],
@@ -217,7 +226,6 @@ if __name__ == '__main__':
          'z': target_pyramid['z'] + 0.25,
          'selection': ['pyramid', 'pyramid', 'pyramid', 'pyramid', 'pyramid']})
 
-    # Create additional points
     n_points = 150
     source_points = source_pyramid.append(pd.DataFrame(
         {'x': source_pyramid['x'][4] + np.random.randn(n_points)/10,
@@ -225,14 +233,12 @@ if __name__ == '__main__':
          'z': source_pyramid['z'][4] + np.random.randn(n_points)/10 + 0.2,
          'selection': ['points' for _ in range(n_points)]})).reset_index()
 
-    # Registration
     before_pyramid = source_pyramid.copy()
     before_points = source_points[source_points.selection == 'points'].copy()
     register(target_pyramid, source_pyramid, source_points)
     after_pyramid = source_points[source_points.selection == 'pyramid']
     after_points = source_points[source_points.selection == 'points']
 
-    # Estimate density
     after_points.loc[:, 'timestep'] = 1
     sweep_radii(after_points, n=12)
     sns.set(style="whitegrid")
@@ -240,7 +246,6 @@ if __name__ == '__main__':
     plot_densities(after_points, palette='PuRd_r')
     plt.show()
 
-    # Plot before & after
     sns.set(style="white")
     fig = plt.figure(figsize=(8, 4))
 
@@ -273,7 +278,8 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-    # Trace Lineage
+
+    """Demonstrate & test lineage tracing"""
     df = pd.DataFrame({
         'id_center': 1000 + np.arange(5),
         'timestep': np.arange(1,6),
@@ -298,3 +304,25 @@ if __name__ == '__main__':
 
     trace_lineage(df)
     print(df)
+
+
+    """Demonstrate & test surface & volume calculation"""
+    cube_points = np.array([[0,0,0], [1,0,0], [1,1,0], [0,1,0],
+        [0,0,1], [1,0,1], [1,1,1], [0,1,1]])
+    cube_tri = np.array([[0,1,2], [0,2,3], [1,5,6], [1,6,2], [3,2,6], [3,6,7],
+        [0,3,4], [4,3,7], [1,0,4], [1,4,5], [4,7,5], [7,6,5]])
+
+    points = np.vstack([cube_points, cube_points + 2])
+    tri = np.vstack([cube_tri, cube_tri + 8])
+
+    surface = mesh_surface(points, tri)
+    volume = mesh_volume(points, tri)
+    print('Each cube has {} surface and {} volume.'.format(surface/2, volume/2))
+
+    sns.set_style('white')
+    fig = plt.figure(figsize=(4,4))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_trisurf(points[:,0], points[:,1], points[:,2], triangles=tri)
+    equalize_axis3d(ax)
+    plt.tight_layout()
+    plt.show()
