@@ -237,30 +237,35 @@ if __name__ == '__main__':
     sweep_radii(after_points, n=12)
     sns.set(style="whitegrid")
     plt.title('Density estimtates for different radii')
-    plot_densities(after_points, color='PuRd_r')
+    plot_densities(after_points, palette='PuRd_r')
     plt.show()
 
     # Plot before & after
     sns.set(style="white")
     fig = plt.figure(figsize=(8, 4))
 
+    blue = sns.color_palette('deep')[0]
+    green = sns.color_palette('deep')[1]
+    red = sns.color_palette('deep')[2]
+
     before = fig.add_subplot(1,2,1, projection='3d')
     plt.title('Before registration')
     before.axis('off')
     before.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
-        shade=False, color='Green', alpha=0.25, linewidth=0.2)
+        shade=False, color=blue, alpha=0.5, linewidth=0.2)
     before.plot_trisurf(before_pyramid['x'], before_pyramid['y'], before_pyramid['z'],
-        shade=False, color='Red', alpha=0.25, linewidth=0.2)
-    before.scatter(before_points['x'], before_points['y'], before_points['z'])
+        shade=False, color=red, alpha=0.5, linewidth=0.2)
+    before.scatter(before_points['x'], before_points['y'], before_points['z'],
+        color=green)
     equalize_axis3d(before, 1.75)
 
     after = fig.add_subplot(1,2,2, projection='3d')
     plt.title('After registration, with density estimates')
     after.axis('off')
     after.plot_trisurf(target_pyramid['x'], target_pyramid['y'], target_pyramid['z'],
-        shade=False, color='Green', alpha=0.25, linewidth=0.2)
+        shade=False, color=blue, alpha=0.5, linewidth=0.2)
     after.plot_trisurf(after_pyramid['x'], after_pyramid['y'], after_pyramid['z'],
-        shade=False, color='Red', alpha=0.25, linewidth=0.2)
+        shade=False, color=red, alpha=0.5, linewidth=0.2)
     asdf = after.scatter(after_points['x'], after_points['y'], after_points['z'],
         c=after_points['r = 0.12'], cmap='RdBu_r')
     equalize_axis3d(after, 1, before)
