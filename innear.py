@@ -207,7 +207,7 @@ def mesh_volume(points, tri):
         points = points.as_matrix()
     center = np.mean(points, axis=0)
     vec1 = points[tri[:,1]] - points[tri[:,0]]
-    vec2 = points[tri[:,2]] - points[tri[:,1]]
+    vec2 = points[tri[:,1]] - points[tri[:,2]]
     vec3 = center - points[tri[:,1]]
     cross = np.cross(vec1, vec2)
     return np.sum(cross*vec3/6)
@@ -309,8 +309,8 @@ if __name__ == '__main__':
     """Demonstrate & test surface & volume calculation"""
     cube_points = np.array([[0,0,0], [1,0,0], [1,1,0], [0,1,0],
         [0,0,1], [1,0,1], [1,1,1], [0,1,1]])
-    cube_tri = np.array([[0,1,2], [0,2,3], [1,5,6], [1,6,2], [3,2,6], [3,6,7],
-        [0,3,4], [4,3,7], [1,0,4], [1,4,5], [4,7,5], [7,6,5]])
+    cube_tri = np.array([[0,2,1], [0,3,2], [1,6,5], [1,2,6], [3,6,2], [3,7,6],
+        [0,4,3], [4,7,3], [1,4,0], [1,5,4], [4,5,7], [7,5,6]])
 
     points = np.vstack([cube_points, cube_points + 2])
     tri = np.vstack([cube_tri, cube_tri + 8])
