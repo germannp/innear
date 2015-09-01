@@ -191,6 +191,17 @@ def read_vtk_mesh(path): # Not tested
     return points, tri
 
 
+def mesh_surface(points, tri): # Not tested
+    """Calculate surfaces of mesh"""
+    if type(points) == pd.core.frame.DataFrame:
+        points = points.as_matrix()
+    vec1 = points[tri[:,1]] - points[tri[:,0]]
+    vec2 = points[tri[:,2]] - points[tri[:,1]]
+    prod = np.cross(vec1, vec2)
+    surf = np.sum(np.linalg.norm(prod, axis=1))
+    return surf
+
+
 if __name__ == '__main__':
     """Demonstrates registration, density estimation and lineage tracing"""
 
