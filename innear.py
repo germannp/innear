@@ -194,7 +194,7 @@ def read_vtk_mesh(path): # Not tested
 def mesh_surface(points, tri):
     """Calculate surfaces of mesh"""
     if type(points) == pd.core.frame.DataFrame:
-        points = points.as_matrix()
+        points = points[['x', 'y', 'z']].as_matrix()
     vec1 = points[tri[:,1]] - points[tri[:,0]]
     vec2 = points[tri[:,2]] - points[tri[:,1]]
     prod = np.cross(vec1, vec2)
@@ -204,7 +204,7 @@ def mesh_surface(points, tri):
 def mesh_volume(points, tri):
     """Calculate volume of closed surface (inspired by pyformex)"""
     if type(points) == pd.core.frame.DataFrame:
-        points = points.as_matrix()
+        points = points[['x', 'y', 'z']].as_matrix()
     center = np.mean(points, axis=0)
     vec1 = points[tri[:,1]] - points[tri[:,0]]
     vec2 = points[tri[:,1]] - points[tri[:,2]]
