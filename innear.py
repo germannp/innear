@@ -317,7 +317,7 @@ if __name__ == '__main__':
 
     surface = mesh_surface(points, tri)
     volume = mesh_volume(points, tri)
-    print('Each cube has {} surface and {} volume.'.format(surface/2, volume/2))
+    print('\nEach cube has {} surface and {} volume.'.format(surface/2, volume/2))
 
     sns.set_style('white')
     fig = plt.figure(figsize=(4,4))
