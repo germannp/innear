@@ -1,4 +1,6 @@
 """Functions to analyse cell tracks"""
+from __future__ import division
+
 import numpy as np
 import pandas as pd
 import scipy.spatial as spatial
